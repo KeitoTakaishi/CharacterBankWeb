@@ -131,8 +131,8 @@ void main(){
     vec2 uv = vec2(1.0/vertexNum * vertexID + delta, 0.0);
     vec3 vatPos = texture2D(VATTex0, uv).rgb;
 	vec3 dir = (mouseRotMat * vec4(vatPos, 1.0)).xyz - (mouseRotMat * vec4(position, 1.0)).xyz;
-	//float k = easeInCubic(fract(time*0.75));
-	float k = easeOutCubic(0.5*(1.0+sin(time*2.0)));
+	//float k = easeInQuad(fract(time*0.75));
+	float k = easeOutQuad(0.5*(1.0+sin(time*2.0)));
 	mat4 translateMat = TranslateMatrix(dir * k);
 
     mat4 _model = translateMat * mouseRotMat; 
