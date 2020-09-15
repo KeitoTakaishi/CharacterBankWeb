@@ -1,14 +1,22 @@
+#extension GL_OES_standard_derivatives : enable
 precision mediump float;
 
 uniform vec2 mousePos;
 uniform float isMouseClicked;
+uniform sampler2D VATTex0;
+uniform float vertexNum;
 
+varying vec4 vPos;
 varying vec3 vCol;
-void main(){
-    //vec3 interractionCol = vec3(mousePos.x * isMouseClicked, mousePos.y * isMouseClicked, .0);
-    //vec3 interractionCol = vec3(mousePos.x, mousePos.y, .0);
-    vec3 interractionCol = vec3(1.0, 1.0, 1.0);
+varying float vVertexId;
 
-    gl_FragColor = vec4(vCol,  1.0 );
+void main(){
+    vec3 dx = dFdx(vPos.xyz);
+    vec3 dy = dFdy(vPos.xyz);
+    vec3 n = normalize(cross(normalize(dx), normalize(dy)));
+
+    vec3 light = normalize( vec3(0.5, 1.0, 0.0));
+    float diff = clamp(dot(n, light), 0.1, 1.0);
+    gl_FragColor = vec4(vec3(1.0) * diff, 1.0);
 }
 

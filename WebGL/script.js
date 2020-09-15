@@ -13,17 +13,25 @@ const MAT = new matIV();
 const QTN = new qtnIV();
 
 
-let jsonData;
+let geomJsonData;
 let position, vertexIndex, vertexID = [];
-console.log("jsonLoadStart");
-        //const jsonDataPath = "./Data.json";
-        const jsonDataPath = "./Data.json";
-        fetch(jsonDataPath)
-            .then(response => response.json())
-            .then(data => {
-                //console.log(typeof(data));
-                jsonData = data;
-            });
+
+const geomJsonDataPath = './Data.json';
+fetch(geomJsonDataPath)
+    .then(response => response.json())
+    .then(data => {
+        //console.log(typeof(data));
+        geomJsonData = data;
+    });
+
+const VATEndJsonDataPath = './VATEnd.json'
+let VATJsonData;
+fetch(VATEndJsonDataPath)
+    .then(response => response.json())
+    .then(data =>{
+        VATJsonData = data;
+    });
+
 
 
 class WebGLFrame {
@@ -67,6 +75,17 @@ class WebGLFrame {
             throw new Error('webgl not supported');
         }
 
+        /*
+	    const ext = this.gl.getExtension('OES_texture_float');
+        if(ext == null){
+            alert('float texture not supported');
+            return;
+        }else{
+            console.log("enable Extention Float Texture");
+        }
+        */
+
+        const ext = this.getWebGLExtensions();
         this.stats = new Stats();
         const container = document.getElementById('container');
         container.appendChild(this.stats.domElement);
@@ -107,6 +126,7 @@ class WebGLFrame {
                     gl.getUniformLocation(this.program, 'mousePos'),
                     gl.getUniformLocation(this.program, 'time'),
                     gl.getUniformLocation(this.program, 'vertexNum'),
+                    gl.getUniformLocation(this.program, 'VATTex0'),
 
                 ];
                 this.uniType = [
@@ -119,6 +139,7 @@ class WebGLFrame {
                     'uniform2fv',
                     'uniform1f',
                     'uniform1f',
+                    'uniform1i',
                 ];
                 resolve();
             });
@@ -149,23 +170,26 @@ class WebGLFrame {
 
         //--------------------------------------------------------------------
         //Geometry
-        const position = jsonData[`Position`];
-        const indices = jsonData[`Index`];
-        const verteID = jsonData[`ID`]
+        const position = geomJsonData[`Position`];
+        const indices = geomJsonData[`Index`];
+        const verteID = geomJsonData[`ID`]
         
         
         this.position = position;
         this.indices = indices;
         this.verteID = verteID;
-        this.vertexNum = this.verteID.length;
+        this.vertexNum = this.position.length / 3;
 
-        console.log(this.verteID);
+        //console.log(this.verteID);
         //console.log(this.verteNum);
 
         this.geomVbo = [this.createVbo(this.position), this.createVbo(this.verteID)];
         this.geomIbo = this.createIbo(this.indices);
 
-        //console.log(this.position);
+        
+        //VAT
+        this.VATPosition = VATJsonData['Position'];
+        this.VATTex = this.createRenderTexture(this.VATPosition);
         //--------------------------------------------------------------------
         //setup rendering
         gl.clearColor(0.2, 0.2, 0.2, 1.0);
@@ -220,6 +244,10 @@ class WebGLFrame {
         MAT.inverse(this.vMatrix, this.invViewMatrix);
         MAT.inverse(this.pMatrix, this.invProjMatrix);
 
+        //Uniform
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.VATTex);
+        
 
         
         this.setUniform([
@@ -231,12 +259,13 @@ class WebGLFrame {
             this.isMouseClicked,
             [this.mousePos[0], this.mousePos[1]],
             this.nowTime,
-            this.vertexNum
+            this.vertexNum,
+            0
         ], 
         this.uniLocation, this.uniType);
         
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-        //gl.drawArrays(gl.POINTS, 0, this.position.length / 3);
+        gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
     loadShader(pathArray){
@@ -345,7 +374,41 @@ class WebGLFrame {
         });
     }
 
-  
+    //source is list data
+    createRenderTexture(source){
+        if(this.gl == null){
+            throw new Error('webgl not initialized');
+        }
+      
+        let gl = this.gl;
+        let fTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, fTex);
+        const level = 0;
+        const internalFormat = gl.RGB;
+        const width = this.vertexNum;
+        const  height = 1;
+        const border = 0;
+        const format = gl.RGB;
+        const type = gl.FLOAT;
+        let data = new Float32Array(source);
+        console.log(data);
+        const alignment = 1;
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, alignment);
+        gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border,
+                        format, type, data);
+        // set the filtering so we don't need mips and it's not filtered
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        return fTex;
+
+    }
+
     createFramebuffer(width, height){
         if(this.gl == null){
             throw new Error('webgl not initialized');
@@ -437,39 +500,13 @@ class WebGLFrame {
         return {
             elementIndexUint: gl.getExtension('OES_element_index_uint'),
             textureFloat:     gl.getExtension('OES_texture_float'),
-            textureHalfFloat: gl.getExtension('OES_texture_half_float')
+            textureHalfFloat: gl.getExtension('OES_texture_half_float'),
+            OES_standard_derivatives: gl.getExtension('OES_standard_derivatives'),
         };
     }
 }
 
-function torus(row, column, irad, orad){
-    var pos = new Array(), idx = new Array();
-    for(var i = 0; i <= row; i++){
-        var r = Math.PI * 2 / row * i;
-        var rr = Math.cos(r);
-        var ry = Math.sin(r);
-        for(var ii = 0; ii <= column; ii++){
-            var tr = Math.PI * 2 / column * ii;
-            var tx = (rr * irad + orad) * Math.cos(tr);
-            var ty = ry * irad;
-            var tz = (rr * irad + orad) * Math.sin(tr);
-            pos.push(tx, ty, tz);
-        }
-    }
-    for(i = 0; i < row; i++){
-        for(ii = 0; ii < column; ii++){
-            r = (column + 1) * i + ii;
-            idx.push(r, r + column + 1, r + 1);
-            idx.push(r + column + 1, r + column + 2, r + 1);
-        }
-    }
-    return [pos, idx];
-}
 
-//----------------------------------------------------------------------------------------------------------
-function mouseEventTest(){
-    console.log("click");
-}
 //----------------------------------------------------------------------------------------------------------
 class InteractionCamera {
     /**
