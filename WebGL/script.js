@@ -1,7 +1,27 @@
 
+let EVENTNAME_TOUCHSTART;
+let EVENTNAME_TOUCHEND;
+let EVENTNAME_TOUCHMOVE;
+let isUsedTouch = false;
+
 window.addEventListener('DOMContentLoaded', () => {
+    if ('ontouchend' in document) {
+        console.log('Event Type : Touch');
+        EVENTNAME_TOUCHSTART = 'touchstart';
+        EVENTNAME_TOUCHMOVE = 'touchmove';
+        EVENTNAME_TOUCHEND = 'touchend';
+        isUsedTouch = true;
+    } else {
+        console.log('Event Type : Mouse');
+        EVENTNAME_TOUCHSTART = 'mousedown';
+        EVENTNAME_TOUCHMOVE = 'mousemove';
+        EVENTNAME_TOUCHEND = 'mouseup';
+    }
+
+
     let webgl = new WebGLFrame();
-    webgl.init('webgl-canvas');
+    //webgl.init('webgl-canvas');
+    webgl.init(document.getElementById( "webgl-canvas" ) );
     webgl.load()      
     .then(() => {
         webgl.setup();  
@@ -20,7 +40,6 @@ const geomJsonDataPath = './Data.json';
 fetch(geomJsonDataPath)
     .then(response => response.json())
     .then(data => {
-        //console.log(typeof(data));
         geomJsonData = data;
     });
 
@@ -58,9 +77,12 @@ class WebGLFrame {
         this.invProjMatrix = MAT.identity(MAT.create());
 
     }
+
     init(canvas){
         if(canvas instanceof HTMLCanvasElement === true){
+            console.log("canvas");
             this.canvas = canvas;
+
         }else if(Object.prototype.toString.call(canvas) === '[object String]'){
             let c = document.querySelector(`#${canvas}`);
             if(c instanceof HTMLCanvasElement === true){
@@ -86,9 +108,9 @@ class WebGLFrame {
         */
 
         const ext = this.getWebGLExtensions();
-        this.stats = new Stats();
-        const container = document.getElementById('container');
-        container.appendChild(this.stats.domElement);
+        //this.stats = new Stats();
+        //const container = document.getElementById('container');
+        //container.appendChild(this.stats.domElement);
     }
     load(){
         this.program     = null; 
@@ -155,17 +177,28 @@ class WebGLFrame {
         this.canvas.addEventListener('wheel', this.camera.wheelEvent);
 
         this.isMouseClicked = 0;
-        this.mousePos = [];
-        this.canvas.addEventListener('mousedown', () =>{
+        this.mousePos = [this.canvas.width/2.0, this.canvas.height/2.0];
+        //this.mousePos = [];
+
+
+        //Event
+        this.canvas.addEventListener(EVENTNAME_TOUCHSTART, () =>{
             this.isMouseClicked = 1;
         });
         
-        this.canvas.addEventListener('mouseup', () =>{
+        this.canvas.addEventListener(EVENTNAME_TOUCHEND, () =>{
             this.isMouseClicked = 0;
         });
 
-        this.canvas.addEventListener('mousemove', (e) =>{
-            this.mousePos = [e.clientX/window.innerWidth, e.clientY/window.innerHeight];
+        this.canvas.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
+            if(isUsedTouch){
+                //when table
+                this.mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
+            }else{
+                //when Mouse
+                this.mousePos = [e.clientX/window.innerWidth, e.clientY/window.innerHeight];
+            }
+
         });
 
         //--------------------------------------------------------------------
@@ -179,9 +212,6 @@ class WebGLFrame {
         this.indices = indices;
         this.verteID = verteID;
         this.vertexNum = this.position.length / 3;
-
-        //console.log(this.verteID);
-        //console.log(this.verteNum);
 
         this.geomVbo = [this.createVbo(this.position), this.createVbo(this.verteID)];
         this.geomIbo = this.createIbo(this.indices);
@@ -203,7 +233,7 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-        this.stats.update();
+        //this.stats.update();
         //--------------------------------------------------------------------
         //setup
         let gl = this.gl;
@@ -211,8 +241,14 @@ class WebGLFrame {
             requestAnimationFrame(this.render);
         }
         this.nowTime = (Date.now() - this.beginTime) / 1000;
+        
+        //Canvas Size
+        //this.canvas.width = 500;
+        //this.canvas.height = 500;
+
         this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.canvas.height = window.innerHeight/2.0;
+
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         //--------------------------------------------------------------------
@@ -391,7 +427,7 @@ class WebGLFrame {
         const format = gl.RGB;
         const type = gl.FLOAT;
         let data = new Float32Array(source);
-        console.log(data);
+
         const alignment = 1;
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, alignment);
         gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border,
