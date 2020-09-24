@@ -4,7 +4,10 @@ let EVENTNAME_TOUCHEND;
 let EVENTNAME_TOUCHMOVE;
 let isUsedTouch = false;
 let mousePos = [];
+
+
 window.addEventListener('DOMContentLoaded', () => {
+    console.log('onLoadEvent');
     if ('ontouchend' in document) {
         console.log('Event Type : Touch');
         EVENTNAME_TOUCHSTART = 'touchstart';
@@ -18,6 +21,19 @@ window.addEventListener('DOMContentLoaded', () => {
         EVENTNAME_TOUCHEND = 'mouseup';
     }
 
+    
+    window.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
+        console.log('TouchEvent');
+        offSet = [0.0 ,0.0];
+        if(isUsedTouch){
+            mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
+            console.log(mousePos);
+        }else{
+            mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
+        }
+        
+        //console.log(mousePos);
+    });
 
     let webgl = new WebGLFrame();
     //webgl.init('webgl-canvas');
@@ -30,21 +46,8 @@ window.addEventListener('DOMContentLoaded', () => {
 }, false);
 
 
-/*
-window.onmousemove = handleMouseMove;
-      function handleMouseMove(event) {
-        event = event || window.event; // IE対応
-        console.log(event.clientX);
-        //target.innerHTML = "Client X:" + event.clientX + ", Client Y:" + event.clientY;
-      }
-*/
 
-window.addEventListener('mousemove', (e) =>{
-    //console.log('onmouseover');
-    offSet = [0.0 ,0.0];
-    mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
-    //console.log(mousePos);
-});
+
 
 const MAT = new matIV();
 const QTN = new qtnIV();
