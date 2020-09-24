@@ -7,15 +7,15 @@ let mousePos = [];
 
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log('onLoadEvent');
+    //console.log('onLoadEvent');
     if ('ontouchend' in document) {
-        console.log('Event Type : Touch');
+        //console.log('Event Type : Touch');
         EVENTNAME_TOUCHSTART = 'touchstart';
         EVENTNAME_TOUCHMOVE = 'touchmove';
         EVENTNAME_TOUCHEND = 'touchend';
         isUsedTouch = true;
     } else {
-        console.log('Event Type : Mouse');
+        //console.log('Event Type : Mouse');
         EVENTNAME_TOUCHSTART = 'mousedown';
         EVENTNAME_TOUCHMOVE = 'mousemove';
         EVENTNAME_TOUCHEND = 'mouseup';
@@ -23,11 +23,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     
     window.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
-        console.log('TouchEvent');
+        //console.log('TouchEvent');
         offSet = [0.0 ,0.0];
         if(isUsedTouch){
             mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
-            console.log(mousePos);
+            //console.log(mousePos);
         }else{
             mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
         }
@@ -56,14 +56,14 @@ const QTN = new qtnIV();
 let geomJsonData;
 let position, vertexIndex, vertexID = [];
 
-const geomJsonDataPath = './Data.json';
+const geomJsonDataPath = './WebGL/Data.json';
 fetch(geomJsonDataPath)
     .then(response => response.json())
     .then(data => {
         geomJsonData = data;
     });
 
-const VATEndJsonDataPath = './VATEnd.json'
+const VATEndJsonDataPath = './WebGL/VATEnd.json'
 let VATJsonData;
 fetch(VATEndJsonDataPath)
     .then(response => response.json())
@@ -99,7 +99,7 @@ class WebGLFrame {
 
     init(canvas){
         if(canvas instanceof HTMLCanvasElement === true){
-            console.log("canvas");
+            //console.log("canvas");
             this.canvas = canvas;
 
         }else if(Object.prototype.toString.call(canvas) === '[object String]'){
@@ -141,8 +141,8 @@ class WebGLFrame {
 
         return new Promise((resolve) => {
             this.loadShader([
-                './vs1.vert', 
-                './fs1.frag', 
+                './WebGL/vs1.vert', 
+                './WebGL/fs1.frag', 
             ])
             .then((shaders) => {
                 let gl = this.gl;
@@ -222,7 +222,7 @@ class WebGLFrame {
         });
 
         window.addEventListener( 'resize', function() {
-            console.log('resize');
+            //console.log('resize');
             }, false );
 
         //--------------------------------------------------------------------
