@@ -31,9 +31,11 @@ window.addEventListener('DOMContentLoaded', () => {
         offSet = [0.0 ,0.0];
         if(isUsedTouch){
             mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
+            mousePos = [0.5, 0.75];
             //console.log(mousePos);
         }else{
-            mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
+            //mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
+            //mousePos = [0.5, 0.75];
         }
         
         //console.log(mousePos);
@@ -275,7 +277,7 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-        console.log(window)
+        mousePos = [0.5 * Math.sin(this.nowTime) + 0.5, 0.5 * Math.cos(this.nowTime) + 0.5]
         this.stats.update();
         //--------------------------------------------------------------------
         //setup
