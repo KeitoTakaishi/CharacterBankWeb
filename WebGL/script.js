@@ -277,7 +277,10 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-        mousePos = [0.5 * Math.sin(this.nowTime) + 0.5, 0.5 * Math.cos(this.nowTime) + 0.5]
+        mousePos = [0.5 * Math.sin(this.nowTime) + 0.5, 0.5 * Math.cos(this.nowTime) + 0.5];
+        console.log(mousePos);
+        console.log(this.nowTime);
+
         this.stats.update();
         //--------------------------------------------------------------------
         //setup
