@@ -218,6 +218,7 @@ class WebGLFrame {
 
 
         //Event
+        /*
         this.canvas.addEventListener(EVENTNAME_TOUCHSTART, () =>{
             this.isMouseClicked = 1;
         });
@@ -237,6 +238,7 @@ class WebGLFrame {
                 this.mousePos = [e.clientX/this.canvas.width, e.clientY/this.canvas.height];
             }
         });
+        */
 
         window.addEventListener( 'resize', function() {
             //console.log('resize');
@@ -273,6 +275,7 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
+        console.log(window)
         this.stats.update();
         //--------------------------------------------------------------------
         //setup
