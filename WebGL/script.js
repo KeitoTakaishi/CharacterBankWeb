@@ -31,7 +31,10 @@ window.addEventListener('DOMContentLoaded', () => {
         //console.log('TouchEvent');
         offSet = [0.0 ,0.0];
         if(isUsedTouch){
+            var ti = new Date().getTime() / 1000.0;
             mousePos = [e.touches[0].clientY/window.innerWidth, e.touches[0].clientY/window.innerHeight];
+            ti = new Date().getTime()/1000.0 - ti;
+            console.log(ti*1000.0 );
             //mousePos = [e.targetTouches[0].clientX/500.0, e.targetTouches[0].clientY/500.0];
           
         }else{
