@@ -140,7 +140,7 @@ void main(){
     vPos = _model * vec4(position, 1.0);
 
 
-	float diffuse = max(dot(normalize(p.xyz), vec3(0.25, 0.5, 0.0)), 0.0);
+	float diffuse = max(dot(normalize(p.xyz), vec3(0., 0.5, 0.0)), 0.0);
 	diffuse = diffuse * 0.5 + 0.5;
 	vCol = vec3(diffuse);
 	vVertexId = float(vertexID);

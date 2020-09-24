@@ -10,6 +10,7 @@ let geomJsonData;
 let VATJsonData;
 let position, vertexIndex, vertexID = [];
 
+let _ = [];
 window.addEventListener('DOMContentLoaded', () => {
     //console.log('onLoadEvent');
     if ('ontouchend' in document) {
@@ -30,10 +31,12 @@ window.addEventListener('DOMContentLoaded', () => {
         //console.log('TouchEvent');
         offSet = [0.0 ,0.0];
         if(isUsedTouch){
-            mousePos = [e.changedTouches[0].clientX/window.innerWidth, e.changedTouches[0].clientY/window.innerHeight];
+            mousePos = [e.touches[0].clientY/window.innerWidth, e.touches[0].clientY/window.innerHeight];
+            //mousePos = [e.targetTouches[0].clientX/500.0, e.targetTouches[0].clientY/500.0];
           
         }else{
             mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
+            //mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
             //mousePos = [0.5, 0.75];
         }
         
@@ -178,7 +181,6 @@ class WebGLFrame {
                     gl.getUniformLocation(this.program, 'proj'),
                     gl.getUniformLocation(this.program, 'invView'),
                     gl.getUniformLocation(this.program, 'invProj'),
-                    gl.getUniformLocation(this.program, 'isMouseClicked'),
                     gl.getUniformLocation(this.program, 'mousePos'),
                     gl.getUniformLocation(this.program, 'time'),
                     gl.getUniformLocation(this.program, 'vertexNum'),
@@ -191,7 +193,6 @@ class WebGLFrame {
                     'uniformMatrix4fv',
                     'uniformMatrix4fv',
                     'uniformMatrix4fv',
-                    'uniform1f',
                     'uniform2fv',
                     'uniform1f',
                     'uniform1f',
@@ -207,13 +208,13 @@ class WebGLFrame {
     //--------------------------------------------------------------------------------------------------------------------------
     setup(){
         let gl = this.gl;
-        this.camera.update();
-        this.canvas.addEventListener('mousedown', this.camera.startEvent);
-        this.canvas.addEventListener('mousemove', this.camera.moveEvent);
-        this.canvas.addEventListener('mouseup', this.camera.endEvent);
-        this.canvas.addEventListener('wheel', this.camera.wheelEvent);
+        //this.camera.update();
+        //this.canvas.addEventListener('mousedown', this.camera.startEvent);
+        //this.canvas.addEventListener('mousemove', this.camera.moveEvent);
+        //this.canvas.addEventListener('mouseup', this.camera.endEvent);
+        //this.canvas.addEventListener('wheel', this.camera.wheelEvent);
 
-        this.isMouseClicked = 0;
+        //this.isMouseClicked = 0;
         //this.mousePos = [this.canvas.width/2.0, this.canvas.height/2.0];
         //this.mousePos = [];
 
@@ -241,9 +242,7 @@ class WebGLFrame {
         });
         */
 
-        window.addEventListener( 'resize', function() {
-            //console.log('resize');
-            }, false );
+
 
         //--------------------------------------------------------------------
         //Geometry
@@ -288,11 +287,11 @@ class WebGLFrame {
         this.nowTime = (Date.now() - this.beginTime) / 1000;
         
         //Canvas Size
-        this.canvas.width = 500;
-        this.canvas.height = 500;
+        //this.canvas.width = 500;
+        //this.canvas.height = 500;
 
-        //this.canvas.width = window.innerWidth;
-        //this.canvas.height = window.innerHeight/2.0;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight/2.0;
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -337,7 +336,6 @@ class WebGLFrame {
             this.pMatrix,
             this.invViewMatrix,
             this.invProjMatrix,
-            this.isMouseClicked,
             [mousePos[0], mousePos[1]],
             this.nowTime,
             this.vertexNum,
