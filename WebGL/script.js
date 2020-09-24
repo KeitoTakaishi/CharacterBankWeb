@@ -3,7 +3,7 @@ let EVENTNAME_TOUCHSTART;
 let EVENTNAME_TOUCHEND;
 let EVENTNAME_TOUCHMOVE;
 let isUsedTouch = false;
-
+let mousePos = [];
 window.addEventListener('DOMContentLoaded', () => {
     if ('ontouchend' in document) {
         console.log('Event Type : Touch');
@@ -29,6 +29,23 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 }, false);
 
+
+/*
+window.onmousemove = handleMouseMove;
+      function handleMouseMove(event) {
+        event = event || window.event; // IE対応
+        console.log(event.clientX);
+        //target.innerHTML = "Client X:" + event.clientX + ", Client Y:" + event.clientY;
+      }
+*/
+
+window.addEventListener('mousemove', (e) =>{
+    //console.log('onmouseover');
+    offSet = [0.0 ,0.0];
+    mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
+    //console.log(mousePos);
+});
+
 const MAT = new matIV();
 const QTN = new qtnIV();
 
@@ -50,7 +67,6 @@ fetch(VATEndJsonDataPath)
     .then(data =>{
         VATJsonData = data;
     });
-
 
 
 class WebGLFrame {
@@ -177,7 +193,7 @@ class WebGLFrame {
         this.canvas.addEventListener('wheel', this.camera.wheelEvent);
 
         this.isMouseClicked = 0;
-        this.mousePos = [this.canvas.width/2.0, this.canvas.height/2.0];
+        //this.mousePos = [this.canvas.width/2.0, this.canvas.height/2.0];
         //this.mousePos = [];
 
 
@@ -193,13 +209,18 @@ class WebGLFrame {
         this.canvas.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
             if(isUsedTouch){
                 //when table
-                this.mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
+                //this.mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
+                //this.mousePos = [e.changedTouches[0].pageX/this.canvas.width, e.changedTouches[0].pageY/this.canvas.height];
             }else{
                 //when Mouse
-                this.mousePos = [e.clientX/window.innerWidth, e.clientY/window.innerHeight];
+                //this.mousePos = [e.clientX/window.innerWidth, e.clientY/window.innerHeight];
+                this.mousePos = [e.clientX/this.canvas.width, e.clientY/this.canvas.height];
             }
-
         });
+
+        window.addEventListener( 'resize', function() {
+            console.log('resize');
+            }, false );
 
         //--------------------------------------------------------------------
         //Geometry
@@ -229,7 +250,6 @@ class WebGLFrame {
         this.running = true;
         this.beginTime = Date.now();
 
-
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
@@ -243,11 +263,11 @@ class WebGLFrame {
         this.nowTime = (Date.now() - this.beginTime) / 1000;
         
         //Canvas Size
-        //this.canvas.width = 500;
-        //this.canvas.height = 500;
+        this.canvas.width = 500;
+        this.canvas.height = 500;
 
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight/2.0;
+        //this.canvas.width = window.innerWidth;
+        //this.canvas.height = window.innerHeight/2.0;
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -257,7 +277,7 @@ class WebGLFrame {
         this.setAttribute(this.geomVbo, this.attLocation, this.attStride, this.geomIbo);
         //this.setAttribute(this.geomVbo, this.attLocation, this.attStride);
        
-        let cameraPosition    = [0.0, 0.0, 5.0];             
+        let cameraPosition    = [0.0, 0.0, 10.0];             
         let centerPoint       = [0.0, 0.0, 0.0];             
         let cameraUpDirection = [0.0, 1.0, 0.0];             
         let fovy   = 60 * this.camera.scale;                 
@@ -293,7 +313,7 @@ class WebGLFrame {
             this.invViewMatrix,
             this.invProjMatrix,
             this.isMouseClicked,
-            [this.mousePos[0], this.mousePos[1]],
+            [mousePos[0], mousePos[1]],
             this.nowTime,
             this.vertexNum,
             0
