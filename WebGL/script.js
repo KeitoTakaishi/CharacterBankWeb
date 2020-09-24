@@ -4,7 +4,11 @@ let EVENTNAME_TOUCHEND;
 let EVENTNAME_TOUCHMOVE;
 let isUsedTouch = false;
 let mousePos = [];
-
+const MAT = new matIV();
+const QTN = new qtnIV();
+let geomJsonData;
+let VATJsonData;
+let position, vertexIndex, vertexID = [];
 
 window.addEventListener('DOMContentLoaded', () => {
     //console.log('onLoadEvent');
@@ -35,43 +39,50 @@ window.addEventListener('DOMContentLoaded', () => {
         //console.log(mousePos);
     });
 
+
+    const geomJsonDataPath = './WebGL/Data.json';
+    //const geomJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/Data.json';
+    
+    let promises = [];
+    promises[0] = fetch(geomJsonDataPath)
+        .then(response => response.json())
+        .then(data => {
+        geomJsonData = data;
+    });
+
+    const VATEndJsonDataPath = './WebGL/VATEnd.json'
+    //const VATEndJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/VATEnd.json'
+    promises[1] = fetch(VATEndJsonDataPath)
+        .then(response => response.json())
+        .then(data =>{
+            VATJsonData = data;
+    });
+
+    
+
+
     let webgl = new WebGLFrame();
     //webgl.init('webgl-canvas');
     webgl.init(document.getElementById( "webgl-canvas" ) );
+
+    promises[2] = webgl.load();
+    Promise.all(promises)
+    .then(() => {
+        webgl.setup();  
+        webgl.render(); 
+    });
+    /*
     webgl.load()      
     .then(() => {
         webgl.setup();  
         webgl.render(); 
     });
+    */
+
+
 }, false);
 
 
-
-
-
-const MAT = new matIV();
-const QTN = new qtnIV();
-
-
-let geomJsonData;
-let position, vertexIndex, vertexID = [];
-
-//const geomJsonDataPath = './WebGL/Data.json';
-const geomJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/Data.json';
-fetch(geomJsonDataPath)
-    .then(response => response.json())
-    .then(data => {
-        geomJsonData = data;
-    });
-
-//const VATEndJsonDataPath = './WebGL/VATEnd.json'
-const VATEndJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/VATEnd.json'
-let VATJsonData;
-fetch(VATEndJsonDataPath)
-    .then(response => response.json())
-    .then(data =>{
-        VATJsonData = data;
-    });
 
 
 class WebGLFrame {
@@ -133,6 +144,7 @@ class WebGLFrame {
         const container = document.getElementById('container');
         container.appendChild(this.stats.domElement);
     }
+
     load(){
         this.program     = null; 
         this.attLocation = null; 
@@ -188,6 +200,9 @@ class WebGLFrame {
             });
         });
     }
+
+    
+
     //--------------------------------------------------------------------------------------------------------------------------
     setup(){
         let gl = this.gl;
