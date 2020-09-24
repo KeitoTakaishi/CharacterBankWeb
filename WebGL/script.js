@@ -7,7 +7,7 @@ let mousePos = [];
 const MAT = new matIV();
 const QTN = new qtnIV();
 let geomJsonData;
-let VATJsonData;
+let VATJsonData = [];
 let position, vertexIndex, vertexID = [];
 
 let _ = [];
@@ -44,22 +44,26 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    const geomJsonDataPath = './WebGL/Data.json';
-    //const geomJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/Data.json';
-    
     let promises = [];
+    const geomJsonDataPath = './WebGL/Data.json';
     promises[0] = fetch(geomJsonDataPath)
         .then(response => response.json())
         .then(data => {
         geomJsonData = data;
     });
 
-    const VATEndJsonDataPath = './WebGL/VATEnd.json'
-    //const VATEndJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/VATEnd.json'
-    promises[1] = fetch(VATEndJsonDataPath)
+    const VATMidJsonDataPath = './WebGL/VATMid.json'
+    promises[1] = fetch(VATMidJsonDataPath)
         .then(response => response.json())
         .then(data =>{
-            VATJsonData = data;
+            VATJsonData[0] = data;
+    });
+
+    const VATEndJsonDataPath = './WebGL/VATEnd.json'
+    promises[2] = fetch(VATEndJsonDataPath)
+        .then(response => response.json())
+        .then(data =>{
+            VATJsonData[1] = data;
     });
 
     
@@ -69,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
     //webgl.init('webgl-canvas');
     webgl.init(document.getElementById( "webgl-canvas" ) );
 
-    promises[2] = webgl.load();
+    promises[3] = webgl.load();
     Promise.all(promises)
     .then(() => {
         webgl.setup();  
@@ -185,6 +189,7 @@ class WebGLFrame {
                     gl.getUniformLocation(this.program, 'time'),
                     gl.getUniformLocation(this.program, 'vertexNum'),
                     gl.getUniformLocation(this.program, 'VATTex0'),
+                    gl.getUniformLocation(this.program, 'VATTex1'),
 
                 ];
                 this.uniType = [
@@ -196,6 +201,7 @@ class WebGLFrame {
                     'uniform2fv',
                     'uniform1f',
                     'uniform1f',
+                    'uniform1i',
                     'uniform1i',
                 ];
                 resolve();
@@ -261,8 +267,9 @@ class WebGLFrame {
 
         
         //VAT
-        this.VATPosition = VATJsonData['Position'];
-        this.VATTex = this.createRenderTexture(this.VATPosition);
+        this.VATPosition = new Array(VATJsonData[0]['Position'], VATJsonData[1]['Position'])
+       
+        this.VATTex = new Array(this.createRenderTexture(this.VATPosition[0]), this.createRenderTexture(this.VATPosition[1]));
         //--------------------------------------------------------------------
         //setup rendering
         gl.clearColor(0.2, 0.2, 0.2, 1.0);
@@ -326,7 +333,10 @@ class WebGLFrame {
 
         //Uniform
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.VATTex);
+        gl.bindTexture(gl.TEXTURE_2D, this.VATTex[0]);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.VATTex[1]);
         
 
         
@@ -339,7 +349,8 @@ class WebGLFrame {
             [mousePos[0], mousePos[1]],
             this.nowTime,
             this.vertexNum,
-            0
+            0,
+            1,
         ], 
         this.uniLocation, this.uniType);
         
