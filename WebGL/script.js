@@ -56,14 +56,16 @@ const QTN = new qtnIV();
 let geomJsonData;
 let position, vertexIndex, vertexID = [];
 
-const geomJsonDataPath = './WebGL/Data.json';
+//const geomJsonDataPath = './WebGL/Data.json';
+const geomJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/Data.json';
 fetch(geomJsonDataPath)
     .then(response => response.json())
     .then(data => {
         geomJsonData = data;
     });
 
-const VATEndJsonDataPath = './WebGL/VATEnd.json'
+//const VATEndJsonDataPath = './WebGL/VATEnd.json'
+const VATEndJsonDataPath = 'https://github.com/KeitoTakaishi/CharacterBankWeb/WebGL/VATEnd.json'
 let VATJsonData;
 fetch(VATEndJsonDataPath)
     .then(response => response.json())
