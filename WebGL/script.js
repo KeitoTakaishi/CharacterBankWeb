@@ -127,9 +127,9 @@ class WebGLFrame {
         */
 
         const ext = this.getWebGLExtensions();
-        //this.stats = new Stats();
-        //const container = document.getElementById('container');
-        //container.appendChild(this.stats.domElement);
+        this.stats = new Stats();
+        const container = document.getElementById('container');
+        container.appendChild(this.stats.domElement);
     }
     load(){
         this.program     = null; 
@@ -256,7 +256,7 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-        //this.stats.update();
+        this.stats.update();
         //--------------------------------------------------------------------
         //setup
         let gl = this.gl;
