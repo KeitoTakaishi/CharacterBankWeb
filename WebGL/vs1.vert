@@ -19,6 +19,7 @@ uniform float vertexNum;
 uniform sampler2D VATTex0;
 uniform sampler2D VATTex1;
 
+uniform vec3 initPosition;
 
 
 varying vec4 vPos;
@@ -134,7 +135,7 @@ void main(){
     
 
 	//float k = easeOutQuad(0.5*(1.0+sin(time*2.0)));//0.0 ~ 1.0
-	float k = 0.5*(1.0+sin(time));//0.0 ~ 1.0
+	float k = 0.5*(1.0+sin(time*0.2));//0.0 ~ 1.0
 	vec3 vatPos = vec3(0.0, 0.0, 0.0);
 	vec3 dir = vec3(0.0, 0.0, 0.0);
 	mat4 translateMat = TranslateMatrix(vec3(0.0, 0.0, 0.0));
@@ -160,7 +161,9 @@ void main(){
 	
 	
 
-    mat4 _model = translateMat * mouseRotMat; 
+    mat4 _model = translateMat * mouseRotMat ;
+	_model = TranslateMatrix(initPosition) * _model;
+
     vec4 p = proj * view * _model * vec4(position, 1.0);
     vPos = _model * vec4(position, 1.0);
 

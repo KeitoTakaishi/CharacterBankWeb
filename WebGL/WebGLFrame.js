@@ -1,98 +1,3 @@
-
-let EVENTNAME_TOUCHSTART;
-let EVENTNAME_TOUCHEND;
-let EVENTNAME_TOUCHMOVE;
-let isUsedTouch = false;
-let mousePos = [];
-const MAT = new matIV();
-const QTN = new qtnIV();
-let geomJsonData;
-let VATJsonData = [];
-let position, vertexIndex, vertexID = [];
-
-let _ = [];
-window.addEventListener('DOMContentLoaded', () => {
-    //console.log('onLoadEvent');
-    if ('ontouchend' in document) {
-        //console.log('Event Type : Touch');
-        EVENTNAME_TOUCHSTART = 'touchstart';
-        EVENTNAME_TOUCHMOVE = 'touchmove';
-        EVENTNAME_TOUCHEND = 'touchend';
-        isUsedTouch = true;
-    } else {
-        //console.log('Event Type : Mouse');
-        EVENTNAME_TOUCHSTART = 'mousedown';
-        EVENTNAME_TOUCHMOVE = 'mousemove';
-        EVENTNAME_TOUCHEND = 'mouseup';
-    }
-
-    
-    window.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
-        //console.log('TouchEvent');
-        offSet = [0.0 ,0.0];
-        if(isUsedTouch){
-            mousePos = [e.touches[0].clientX/window.innerWidth, e.touches[0].clientY/window.innerHeight];
-            //mousePos = [e.targetTouches[0].clientX/500.0, e.targetTouches[0].clientY/500.0];
-          
-        }else{
-            mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
-            //mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
-            //mousePos = [0.5, 0.75];
-        }
-        
-        //console.log(mousePos);
-    });
-
-
-    let promises = [];
-    const geomJsonDataPath = './WebGL/Data.json';
-    promises[0] = fetch(geomJsonDataPath)
-        .then(response => response.json())
-        .then(data => {
-        geomJsonData = data;
-    });
-
-    const VATMidJsonDataPath = './WebGL/VATMid.json'
-    promises[1] = fetch(VATMidJsonDataPath)
-        .then(response => response.json())
-        .then(data =>{
-            VATJsonData[0] = data;
-    });
-
-    const VATEndJsonDataPath = './WebGL/VATEnd.json'
-    promises[2] = fetch(VATEndJsonDataPath)
-        .then(response => response.json())
-        .then(data =>{
-            VATJsonData[1] = data;
-    });
-
-    
-
-
-    let webgl = new WebGLFrame();
-    //webgl.init('webgl-canvas');
-    webgl.init(document.getElementById( "webgl-canvas" ) );
-
-    promises[3] = webgl.load();
-    Promise.all(promises)
-    .then(() => {
-        webgl.setup();  
-        webgl.render(); 
-    });
-    /*
-    webgl.load()      
-    .then(() => {
-        webgl.setup();  
-        webgl.render(); 
-    });
-    */
-
-
-}, false);
-
-
-
-
 class WebGLFrame {
     /**
      * @constructor
@@ -115,14 +20,11 @@ class WebGLFrame {
         this.mvpMatrix = MAT.identity(MAT.create());
         this.invViewMatrix = MAT.identity(MAT.create());
         this.invProjMatrix = MAT.identity(MAT.create());
-
     }
 
     init(canvas){
         if(canvas instanceof HTMLCanvasElement === true){
-            //console.log("canvas");
             this.canvas = canvas;
-
         }else if(Object.prototype.toString.call(canvas) === '[object String]'){
             let c = document.querySelector(`#${canvas}`);
             if(c instanceof HTMLCanvasElement === true){
@@ -137,23 +39,19 @@ class WebGLFrame {
             throw new Error('webgl not supported');
         }
 
-        /*
-	    const ext = this.gl.getExtension('OES_texture_float');
-        if(ext == null){
-            alert('float texture not supported');
-            return;
-        }else{
-            console.log("enable Extention Float Texture");
-        }
-        */
-
         const ext = this.getWebGLExtensions();
-        this.stats = new Stats();
         const container = document.getElementById('container');
-        container.appendChild(this.stats.domElement);
+
+
+        this.promises = [];
+        this.promises[0] = this.loadShaders();
+        this.promises[1] = jsonLoader.loadA ();
+        return Promise.all(this.promises);
+
     }
 
-    load(){
+
+    loadShaders(){
         this.program     = null; 
         this.attLocation = null; 
         this.attStride   = null; 
@@ -162,7 +60,7 @@ class WebGLFrame {
 
 
         return new Promise((resolve) => {
-            this.loadShader([
+            this.loadShaderFiles([
                 './WebGL/vs1.vert', 
                 './WebGL/fs1.frag', 
             ])
@@ -190,6 +88,7 @@ class WebGLFrame {
                     gl.getUniformLocation(this.program, 'vertexNum'),
                     gl.getUniformLocation(this.program, 'VATTex0'),
                     gl.getUniformLocation(this.program, 'VATTex1'),
+                    gl.getUniformLocation(this.program, 'initPosition'),
 
                 ];
                 this.uniType = [
@@ -203,6 +102,7 @@ class WebGLFrame {
                     'uniform1f',
                     'uniform1i',
                     'uniform1i',
+                    'uniform3fv'
                 ];
                 resolve();
             });
@@ -215,46 +115,12 @@ class WebGLFrame {
     setup(){
         let gl = this.gl;
         //this.camera.update();
-        //this.canvas.addEventListener('mousedown', this.camera.startEvent);
-        //this.canvas.addEventListener('mousemove', this.camera.moveEvent);
-        //this.canvas.addEventListener('mouseup', this.camera.endEvent);
-        //this.canvas.addEventListener('wheel', this.camera.wheelEvent);
-
-        //this.isMouseClicked = 0;
-        //this.mousePos = [this.canvas.width/2.0, this.canvas.height/2.0];
-        //this.mousePos = [];
-
-
-        //Event
-        /*
-        this.canvas.addEventListener(EVENTNAME_TOUCHSTART, () =>{
-            this.isMouseClicked = 1;
-        });
-        
-        this.canvas.addEventListener(EVENTNAME_TOUCHEND, () =>{
-            this.isMouseClicked = 0;
-        });
-
-        this.canvas.addEventListener(EVENTNAME_TOUCHMOVE, (e) =>{
-            if(isUsedTouch){
-                //when table
-                //this.mousePos = [e.changedTouches[0].pageX/window.innerWidth, e.changedTouches[0].pageY/window.innerHeight];
-                //this.mousePos = [e.changedTouches[0].pageX/this.canvas.width, e.changedTouches[0].pageY/this.canvas.height];
-            }else{
-                //when Mouse
-                //this.mousePos = [e.clientX/window.innerWidth, e.clientY/window.innerHeight];
-                this.mousePos = [e.clientX/this.canvas.width, e.clientY/this.canvas.height];
-            }
-        });
-        */
-
-
-
         //--------------------------------------------------------------------
         //Geometry
-        const position = geomJsonData[`Position`];
-        const indices = geomJsonData[`Index`];
-        const verteID = geomJsonData[`ID`]
+        //console.log(this.geomJsonData);
+        const position = jsonLoader.geomJsonData[`Position`];
+        const indices = jsonLoader.geomJsonData[`Index`];
+        const verteID = jsonLoader.geomJsonData[`ID`]
         
         
         this.position = position;
@@ -267,12 +133,15 @@ class WebGLFrame {
 
         
         //VAT
-        this.VATPosition = new Array(VATJsonData[0]['Position'], VATJsonData[1]['Position'])
-       
-        this.VATTex = new Array(this.createRenderTexture(this.VATPosition[0]), this.createRenderTexture(this.VATPosition[1]));
+      
+       this.VATPosition = new Array(
+        jsonLoader.VATJsonData[0]['Position'], 
+        jsonLoader.VATJsonData[1]['Position'],
+       );
+       this.VATTex =  new Array(this.createRenderTexture(this.VATPosition[0]), this.createRenderTexture(this.VATPosition[1]));
         //--------------------------------------------------------------------
         //setup rendering
-        gl.clearColor(0.2, 0.2, 0.2, 1.0);
+        gl.clearColor(0.2, 0.2, 0.2, 0.0);
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
 
@@ -282,9 +151,7 @@ class WebGLFrame {
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-        //mousePos = [0.5 * Math.sin(this.nowTime) + 0.5, 0.5 * Math.cos(this.nowTime) + 0.5];
        
-        this.stats.update();
         //--------------------------------------------------------------------
         //setup
         let gl = this.gl;
@@ -297,8 +164,8 @@ class WebGLFrame {
         //this.canvas.width = 500;
         //this.canvas.height = 500;
 
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight/2.0;
+        //this.canvas.width = window.innerWidth;
+        //this.canvas.height = window.innerHeight;
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -331,15 +198,14 @@ class WebGLFrame {
         MAT.inverse(this.vMatrix, this.invViewMatrix);
         MAT.inverse(this.pMatrix, this.invProjMatrix);
 
+
         //Uniform
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.VATTex[0]);
-
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.VATTex[1]);
         
 
-        
         this.setUniform([
             this.mMatrix,
             this.vMatrix,
@@ -359,9 +225,10 @@ class WebGLFrame {
         
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
         gl.bindTexture(gl.TEXTURE_2D, null);
+    
     }
 
-    loadShader(pathArray){
+    loadShaderFiles (pathArray){
         if(Array.isArray(pathArray) !== true){
             throw new Error('invalid argument');
         }
@@ -601,79 +468,3 @@ class WebGLFrame {
 
 
 //----------------------------------------------------------------------------------------------------------
-class InteractionCamera {
-    /**
-     * @constructor
-     */
-    constructor(){
-        this.qtn               = QTN.identity(QTN.create());
-        this.dragging          = false;
-        this.prevMouse         = [0, 0];
-        this.rotationScale     = Math.min(window.innerWidth, window.innerHeight);
-        this.rotation          = 0.0;
-        this.rotateAxis        = [0.0, 0.0, 0.0];
-        this.rotatePower       = 2.0;
-        this.rotateAttenuation = 0.9;
-        this.scale             = 1.0;
-        this.scalePower        = 0.0;
-        this.scaleAttenuation  = 0.8;
-        this.scaleMin          = 0.25;
-        this.scaleMax          = 2.0;
-        this.startEvent        = this.startEvent.bind(this);
-        this.moveEvent         = this.moveEvent.bind(this);
-        this.endEvent          = this.endEvent.bind(this);
-        this.wheelEvent        = this.wheelEvent.bind(this);
-    }
-    /**
-     * mouse down event
-     * @param {Event} eve - event object
-     */
-    startEvent(eve){
-        this.dragging = true;
-        this.prevMouse = [eve.clientX, eve.clientY];
-    }
-    /**
-     * mouse move event
-     * @param {Event} eve - event object
-     */
-    moveEvent(eve){
-        if(this.dragging !== true){return;}
-        let x = this.prevMouse[0] - eve.clientX;
-        let y = this.prevMouse[1] - eve.clientY;
-        this.rotation = Math.sqrt(x * x + y * y) / this.rotationScale * this.rotatePower;
-        this.rotateAxis[0] = y;
-        this.rotateAxis[1] = x;
-        this.prevMouse = [eve.clientX, eve.clientY];
-    }
-    /**
-     * mouse up event
-     */
-    endEvent(){
-        this.dragging = false;
-    }
-    /**
-     * wheel event
-     * @param {Event} eve - event object
-     */
-    wheelEvent(eve){
-        let w = eve.wheelDelta;
-        let s = this.scaleMin * 0.1;
-        if(w > 0){
-            this.scalePower = -s;
-        }else if(w < 0){
-            this.scalePower = s;
-        }
-    }
-    /**
-     * quaternion update
-     */
-    update(){
-        this.scalePower *= this.scaleAttenuation;
-        this.scale = Math.max(this.scaleMin, Math.min(this.scaleMax, this.scale + this.scalePower));
-        if(this.rotation === 0.0){return;}
-        this.rotation *= this.rotateAttenuation;
-        let q = QTN.identity(QTN.create());
-        QTN.rotate(this.rotation, this.rotateAxis, q);
-        QTN.multiply(this.qtn, q, this.qtn);
-    }
-}
