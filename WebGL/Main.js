@@ -1,4 +1,4 @@
-const assetsPath = './'
+const assetsPath = './WebGL/'
 
 let EVENTNAME_TOUCHSTART;
 let EVENTNAME_TOUCHEND;
@@ -31,11 +31,9 @@ window.addEventListener('DOMContentLoaded', () => {
             mousePos = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
         }
     });
-
     
-    let webgl = [new WebGLFrame(), new WebGLFrame()];
+    let webgl = [new WebGLFrame(), new WebGLFrame(), new WebGLFrame()];
     
-
     let p = [];
     p[0] = webgl[0].init(document.getElementById( "webgl-canvas" ) );
     p[0].then(() => {
@@ -47,5 +45,10 @@ window.addEventListener('DOMContentLoaded', () => {
     p[1].then(() => {
         webgl[1].setup();  
         webgl[1].render(); 
+    });
+    p[2] = webgl[2].init(document.getElementById( "webgl-canvas3" ) );
+    p[2].then(() => {
+        webgl[2].setup();  
+        webgl[2].render(); 
     });
 }, false);

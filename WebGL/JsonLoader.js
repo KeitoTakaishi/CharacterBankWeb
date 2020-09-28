@@ -62,81 +62,70 @@ class JsonLoader{
 
     loadA(){
         this.jsonPromises = [];
-        this.jsonPath = assetsPath + 'WebGL/Geometry.json';
-        this.jsonPromises[0] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data => {
-            this.geomJsonData = data;
-        });
+        this.path = ['Geometry.json', 'VAT1_Mid1.json', 'VAT1_End1.json'];
 
-        //Mid1
-        this.jsonPath = assetsPath + 'WebGL/VAT1_Mid1.json'
-        this.jsonPromises[1] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[0] = data;
-        });
-        //End1
-        this.jsonPath = assetsPath + 'WebGL/VAT1_End1.json'
-        this.jsonPromises[2] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[1] = data;
-        });
+        for(let i = 0; i < 3; i++){
+            this.jsonPath = assetsPath + this.path[i];
+            if(i === 0){
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.geomJsonData = data;
+                });
+            }else{
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.VATJsonData[i-1] = data;
+                });
+            }
+        }
         return Promise.all(this.jsonPromises);
     }
 
     loadB(){
         this.jsonPromises = [];
-        this.jsonPath = assetsPath + 'WebGL/Geometry.json';
-        this.jsonPromises[0] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data => {
-            this.geomJsonData = data;
-        });
-
-        //Mid2
-        this.jsonPath = assetsPath + 'WebGL/VAT2_Mid1.json'
-        this.jsonPromises[1] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[1][0] = data;
-        });
-        //End2
-        this.jsonPath = assetsPath + 'WebGL/VAT2_End1.json'
-        this.jsonPromises[2] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[1][1] = data;
-        });
+        this.path = ['Geometry.json', 'VAT2_Mid1.json', 'VAT2_End1.json'];
+      
+        for(let i = 0; i < 3; i++){
+            this.jsonPath = assetsPath + this.path[i];
+            if(i === 0){
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.geomJsonData = data;
+                });
+            }else{
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.VATJsonData[i-1] = data;
+                });
+            }
+        }
         return Promise.all(this.jsonPromises);
     }
 
     loadC(){
         this.jsonPromises = [];
-        this.jsonPath = assetsPath + 'WebGL/Geometry.json';
-        this.jsonPromises[0] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data => {
-            this.geomJsonData = data;
-        });
-
-        //Mid2
-        this.jsonPath = assetsPath + 'WebGL/VAT2_Mid1.json'
-        this.jsonPromises[1] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[1][0] = data;
-        });
-    
-        //End3
-        this.jsonPath = assetsPath + 'WebGL/VAT2_End2.json'
-        this.jsonPromises[2] = fetch(this.jsonPath)
-            .then(response => response.json())
-            .then(data =>{
-                this.VATJsonData[1][2] = data;
-        });
-
+        this.path = ['Geometry.json', 'VAT2_Mid1.json', 'VAT2_End2.json'];
+        
+        for(let i = 0; i < 3; i++){
+            this.jsonPath = assetsPath + this.path[i];
+            if(i === 0){
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.geomJsonData = data;
+                });
+            }else{
+                this.jsonPromises[i] = fetch(this.jsonPath)
+                    .then(response => response.json())
+                    .then(data => {
+                    this.VATJsonData[i-1] = data;
+                });
+            }
+        }
         return Promise.all(this.jsonPromises);
     }
 

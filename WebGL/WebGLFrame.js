@@ -11,7 +11,6 @@ class WebGLFrame {
         this.nowTime   = 0;     
         this.render = this.render.bind(this);
 
-
         this.camera    = new InteractionCamera();
         this.mMatrix   = MAT.identity(MAT.create());
         this.vMatrix   = MAT.identity(MAT.create());
@@ -21,6 +20,7 @@ class WebGLFrame {
         this.invViewMatrix = MAT.identity(MAT.create());
         this.invProjMatrix = MAT.identity(MAT.create());
     }
+
 
     init(canvas){
         if(canvas instanceof HTMLCanvasElement === true){
@@ -42,12 +42,10 @@ class WebGLFrame {
         const ext = this.getWebGLExtensions();
         const container = document.getElementById('container');
 
-
         this.promises = [];
         this.promises[0] = this.loadShaders();
         this.promises[1] = jsonLoader.loadA ();
         return Promise.all(this.promises);
-
     }
 
 
@@ -88,9 +86,8 @@ class WebGLFrame {
                     gl.getUniformLocation(this.program, 'vertexNum'),
                     gl.getUniformLocation(this.program, 'VATTex0'),
                     gl.getUniformLocation(this.program, 'VATTex1'),
-                    gl.getUniformLocation(this.program, 'initPosition'),
-
                 ];
+
                 this.uniType = [
                     'uniformMatrix4fv',
                     'uniformMatrix4fv',
@@ -102,14 +99,11 @@ class WebGLFrame {
                     'uniform1f',
                     'uniform1i',
                     'uniform1i',
-                    'uniform3fv'
                 ];
                 resolve();
             });
         });
     }
-
-    
 
     //--------------------------------------------------------------------------------------------------------------------------
     setup(){
@@ -122,7 +116,6 @@ class WebGLFrame {
         const indices = jsonLoader.geomJsonData[`Index`];
         const verteID = jsonLoader.geomJsonData[`ID`]
         
-        
         this.position = position;
         this.indices = indices;
         this.verteID = verteID;
@@ -131,9 +124,7 @@ class WebGLFrame {
         this.geomVbo = [this.createVbo(this.position), this.createVbo(this.verteID)];
         this.geomIbo = this.createIbo(this.indices);
 
-        
         //VAT
-      
        this.VATPosition = new Array(
         jsonLoader.VATJsonData[0]['Position'], 
         jsonLoader.VATJsonData[1]['Position'],
@@ -141,17 +132,15 @@ class WebGLFrame {
        this.VATTex =  new Array(this.createRenderTexture(this.VATPosition[0]), this.createRenderTexture(this.VATPosition[1]));
         //--------------------------------------------------------------------
         //setup rendering
-        gl.clearColor(0.2, 0.2, 0.2, 0.0);
+        gl.clearColor(0.2, 0.2, 0.2, 0.0);//for transparent
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
 
         this.running = true;
         this.beginTime = Date.now();
-
     }
     //--------------------------------------------------------------------------------------------------------------------------
     render(){
-       
         //--------------------------------------------------------------------
         //setup
         let gl = this.gl;
@@ -161,19 +150,12 @@ class WebGLFrame {
         this.nowTime = (Date.now() - this.beginTime) / 1000;
         
         //Canvas Size
-        //this.canvas.width = 500;
-        //this.canvas.height = 500;
-
-        //this.canvas.width = window.innerWidth;
-        //this.canvas.height = window.innerHeight;
-
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         //--------------------------------------------------------------------
         //rendering
         gl.useProgram(this.program);
         this.setAttribute(this.geomVbo, this.attLocation, this.attStride, this.geomIbo);
-        //this.setAttribute(this.geomVbo, this.attLocation, this.attStride);
        
         let cameraPosition    = [0.0, 0.0, 10.0];             
         let centerPoint       = [0.0, 0.0, 0.0];             
@@ -449,9 +431,7 @@ class WebGLFrame {
                 gl[type](uniL[index], v);
             }
         });
-    }
-
-   
+    }   
     getWebGLExtensions(){
         if(this.gl == null){
             throw new Error('webgl not initialized');
@@ -465,6 +445,3 @@ class WebGLFrame {
         };
     }
 }
-
-
-//----------------------------------------------------------------------------------------------------------
