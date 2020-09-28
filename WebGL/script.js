@@ -353,6 +353,9 @@ class WebGLFrame {
             1,
         ], 
         this.uniLocation, this.uniType);
+
+        //gl.enable(gl.CULL_FACE);
+        //gl.cullFace(gl.BACK);
         
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
         gl.bindTexture(gl.TEXTURE_2D, null);
