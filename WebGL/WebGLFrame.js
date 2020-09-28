@@ -1,15 +1,12 @@
 class WebGLFrame {
-    /**
-     * @constructor
-     */
     constructor(){
-        // initialize property
         this.canvas    = null;  
         this.gl        = null;  
         this.running   = false; 
         this.beginTime = 0;     
         this.nowTime   = 0;     
         this.render = this.render.bind(this);
+        this.mousePos = [0.5, 0.5];
 
         this.camera    = new InteractionCamera();
         this.mMatrix   = MAT.identity(MAT.create());
@@ -105,13 +102,15 @@ class WebGLFrame {
         });
     }
 
+    setMousePos(position){
+        this.mousePos = [position[0], position[1]];
+    }
     //--------------------------------------------------------------------------------------------------------------------------
     setup(){
         let gl = this.gl;
         //this.camera.update();
         //--------------------------------------------------------------------
         //Geometry
-        //console.log(this.geomJsonData);
         const position = jsonLoader.geomJsonData[`Position`];
         const indices = jsonLoader.geomJsonData[`Index`];
         const verteID = jsonLoader.geomJsonData[`ID`]
@@ -167,7 +166,8 @@ class WebGLFrame {
         this.vMatrix  = MAT.lookAt(cameraPosition, centerPoint, cameraUpDirection);
         this.pMatrix  = MAT.perspective(fovy, aspect, near, far);
         this.vpMatrix = MAT.multiply(this.pMatrix, this.vMatrix);
-       
+        
+
         //Todo
         //this.camera.update();
         let quaternionMatrix = MAT.identity(MAT.create());
@@ -194,7 +194,7 @@ class WebGLFrame {
             this.pMatrix,
             this.invViewMatrix,
             this.invProjMatrix,
-            [mousePos[0], mousePos[1]],
+            [this.mousePos[0], this.mousePos[1]],
             this.nowTime,
             this.vertexNum,
             0,
